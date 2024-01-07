@@ -1,0 +1,14 @@
+{
+  "name": "alarm",
+  "version": "1.0.0",
+  "description": "Provide your alarms to this API, get the remaining time before the next ring!",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Augustin Pasquier",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
