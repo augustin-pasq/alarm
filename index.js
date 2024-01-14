@@ -32,44 +32,49 @@ app.get("/compute", (req, res) => {
     if (req.headers.data !== undefined) {
         try {
             const data = JSON.parse(req.headers.data)
-            const now = new Date()
 
-            let nextAlarm
-            for (const alarm of Object.values(data)) {
-                const [hours, minutes] = alarm.value.split(':')
+            if (Object.keys(data).length > 0) {
+                const now = new Date()
 
-                if (alarm.recurrence === '') {
-                    const today = new Date(new Date().setHours(hours, minutes, 0, 0))
-                    const tomorrow = new Date((new Date()).setDate(today.getDate() + 1))
+                let nextAlarm
+                for (const alarm of Object.values(data)) {
+                    const [hours, minutes] = alarm.value.split(':')
 
-                    nextAlarm = now > today ? tomorrow - now : today - now
-                } else {
-                    const recurrenceDates = []
-                    for (const day of alarm.recurrence.split('\n')) {
+                    if (alarm.recurrence === '') {
                         const today = new Date(new Date().setHours(hours, minutes, 0, 0))
+                        const tomorrow = new Date((new Date()).setDate(today.getDate() + 1))
 
-                        let daysDifference = getDayPosition(day.toLowerCase()) - today.getDay()
-                        if (daysDifference <= -1) daysDifference += 7
+                        nextAlarm = now > today ? tomorrow - now : today - now
+                    } else {
+                        const recurrenceDates = []
+                        for (const day of alarm.recurrence.split('\n')) {
+                            const today = new Date(new Date().setHours(hours, minutes, 0, 0))
 
-                        const nextRecurrenceAlarm = new Date(today.setDate(today.getDate() + daysDifference))
+                            let daysDifference = getDayPosition(day.toLowerCase()) - today.getDay()
+                            if (daysDifference <= -1) daysDifference += 7
 
-                        if (nextRecurrenceAlarm > now) recurrenceDates.push(nextRecurrenceAlarm - now)
+                            const nextRecurrenceAlarm = new Date(today.setDate(today.getDate() + daysDifference))
+
+                            if (nextRecurrenceAlarm > now) recurrenceDates.push(nextRecurrenceAlarm - now)
+                        }
+
+                        nextAlarm = Math.min(...recurrenceDates)
                     }
-
-                    nextAlarm = Math.min(...recurrenceDates)
                 }
-            }
 
-            let responseComponents = {jour: Math.floor(nextAlarm / (24 * 60 * 60 * 1000)), heure: Math.floor((nextAlarm % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)), minute: Math.floor((nextAlarm % (60 * 60 * 1000)) / (60 * 1000)) + (Math.floor((nextAlarm % (60 * 1000)) / 1000) === 0 ? 0 : 1)}
+                let responseComponents = {jour: Math.floor(nextAlarm / (24 * 60 * 60 * 1000)), heure: Math.floor((nextAlarm % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)), minute: Math.floor((nextAlarm % (60 * 60 * 1000)) / (60 * 1000)) + (Math.floor((nextAlarm % (60 * 1000)) / 1000) === 0 ? 0 : 1)}
 
-            if (responseComponents.jour > 0) {
-                response.message = `Votre prochaine alarme sonnera dans ${responseComponents.jour} jour${responseComponents.jour === 1 ? "" : "s"}.`
-            } else if (responseComponents.minute === 0) {
-                response.message = `Votre prochaine alarme sonnera dans ${responseComponents.heure} heure${responseComponents.heure === 1 ? "" : "s"}.`
-            } else if (responseComponents.heure === 0) {
-                response.message = `Votre prochaine alarme sonnera dans ${responseComponents.minute} minute${responseComponents.minute === 1 ? "" : "s"}.`
+                if (responseComponents.jour > 0) {
+                    response.message = `Votre prochaine alarme sonnera dans ${responseComponents.jour} jour${responseComponents.jour === 1 ? "" : "s"}.`
+                } else if (responseComponents.minute === 0) {
+                    response.message = `Votre prochaine alarme sonnera dans ${responseComponents.heure} heure${responseComponents.heure === 1 ? "" : "s"}.`
+                } else if (responseComponents.heure === 0) {
+                    response.message = `Votre prochaine alarme sonnera dans ${responseComponents.minute} minute${responseComponents.minute === 1 ? "" : "s"}.`
+                } else {
+                    response.message = `Votre prochaine alarme sonnera dans ${responseComponents.heure} heure${responseComponents.heure === 1 ? "" : "s"} et ${responseComponents.minute} minute${responseComponents.minute === 1 ? "" : "s"}.`
+                }
             } else {
-                response.message = `Votre prochaine alarme sonnera dans ${responseComponents.heure} heure${responseComponents.heure === 1 ? "" : "s"} et ${responseComponents.minute} minute${responseComponents.minute === 1 ? "" : "s"}.`
+                response.message = "Aucune alarme n'est activée."
             }
 
             response.success = 1
