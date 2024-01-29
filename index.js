@@ -63,7 +63,7 @@ app.get("/compute", (req, res) => {
                 }
 
                 let responseComponents = {jour: Math.floor(nextAlarm / (24 * 60 * 60 * 1000)), heure: Math.floor((nextAlarm % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)), minute: Math.floor((nextAlarm % (60 * 60 * 1000)) / (60 * 1000)) + (Math.floor((nextAlarm % (60 * 1000)) / 1000) === 0 ? 0 : 1)}
-                if (responseComponents.minutes === 60) {
+                if (responseComponents.minute === 60) {
                     responseComponents.minutes = 0
                     responseComponents.heure++
                 }
