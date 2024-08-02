@@ -1,6 +1,18 @@
 const express = require("express")
 const app = express()
 
+const createDateFromString = (dateString) => {
+    const monthNames = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+
+    const [dayPart, timePart] = dateString.split(" à ")
+    const [day, monthName, year] = dayPart.split(" ")
+    const [hours, minutes] = timePart.split(":")
+
+    const month = monthNames.indexOf(monthName.toLowerCase())
+
+    return new Date(year, month, day, hours, minutes)
+}
+
 const getDayPosition = (day) => {
     const daysPositions = Array
         .from({length: 7}, (_, i) => {
@@ -34,10 +46,9 @@ app.get("/compute", (req, res) => {
             const data = JSON.parse(req.headers.data)
 
             if (Object.keys(data).length > 0) {
-                const now = new Date()
-
                 let nextAlarm
                 for (const alarm of Object.values(data)) {
+                    const now = createDateFromString(alarm.device_date)
                     const [hours, minutes] = alarm.value.split(':')
 
                     if (alarm.recurrence === '') {
