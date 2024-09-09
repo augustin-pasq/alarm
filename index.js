@@ -2,7 +2,7 @@ const express = require("express")
 const app = express()
 
 const createDateFromString = (dateString) => {
-    const monthNames = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+    const monthNames = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
 
     const [dayPart, timePart] = dateString.split(" à ")
     const [day, monthName, year] = dayPart.split(" ")
@@ -48,7 +48,10 @@ app.get("/compute", (req, res) => {
             if (Object.keys(data).length > 0) {
                 let nextAlarm
                 for (const alarm of Object.values(data)) {
-                    const now = createDateFromString(alarm.device_date)
+                    const [iphoneDate, iPhoneHours] = alarm.device_date.split(' ')
+                    const [iphoneDay, iPhoneMonth, iPhoneYear] = iphoneDate.split('/')
+                    const now = new Date(`${iPhoneMonth}/${iphoneDay}/${iPhoneYear} ${iPhoneHours}`)
+
                     const [hours, minutes] = alarm.value.split(':')
 
                     if (alarm.recurrence === '') {
